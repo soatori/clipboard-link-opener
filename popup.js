@@ -17,11 +17,15 @@ async function readClipboard() {
   }
 }
 
-// 浏览器拒绝读取剪贴板时（焦点丢失 / 站点权限拦截），退化为手动粘贴框。
-async function currentText() {
+function showFallback() {
+  fallbackEl.classList.remove('hidden');
+}
+
+// 读取剪贴板；失败时（焦点丢失 / 站点权限拦截）按需退化为手动粘贴框。
+async function currentText(revealFallback) {
   const text = await readClipboard();
   if (text !== null) return text;
-  fallbackEl.classList.remove('hidden');
+  if (revealFallback) showFallback();
   return pasteEl.value;
 }
 
@@ -82,7 +86,7 @@ function refresh() {
 }
 
 openBtn.addEventListener('click', async () => {
-  const links = extractLinks(await currentText());
+  const links = extractLinks(await currentText(true));
   renderLinks(links);
   if (!links.length) {
     setStatus('剪贴板为空或没有链接，请先在 App / 网页里点“复制链接”或“分享”', 'warn');
@@ -101,7 +105,7 @@ pasteEl.addEventListener('keydown', (event) => {
 });
 
 (async function init() {
-  const links = extractLinks(await currentText());
+  const links = extractLinks(await currentText(false));
   renderLinks(links);
   if (!links.length) {
     setStatus(IDLE_TEXT);

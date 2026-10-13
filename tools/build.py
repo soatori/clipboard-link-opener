@@ -7,8 +7,10 @@
 输出: dist/clipboard-link-opener-<target>_v<version>.zip   (manifest.json 位于压缩包根目录)
 
 差异说明:
-    - generic / chrome / edge : 纯 Chromium Manifest V3，三者内容一致，仅命名区分目标商店。
+    - generic / chrome / edge : 纯 Chromium Manifest V3，内容一致，仅命名区分投放目标。
     - firefox : 额外注入 browser_specific_settings.gecko（AMO 上传/签名要求 id 与 strict_min_version）。
+
+文件清单与引用校验复用 package.py，作为单一来源。
 """
 
 import json
@@ -18,11 +20,10 @@ import tempfile
 import zipfile
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-DIST = ROOT / "dist"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import package  # noqa: E402  复用 ROOT / collect() / validate()
 
-EXT_FILES = ["manifest.json", "popup.html", "popup.css", "popup.js", "link-extract.js"]
-EXT_DIRS = ["icons"]
+DIST = package.ROOT / "dist"
 
 # Firefox 扩展 id（反向域名风格，仅作标识；发布到 AMO 前需在 AMO 上注册同名）
 GECKO = {"gecko": {"id": "clipboard-link-opener@soatori.github.io", "strict_min_version": "109.0"}}
@@ -31,27 +32,27 @@ TARGETS = ["generic", "chrome", "edge", "firefox"]
 
 
 def version():
-    return json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))["version"]
+    return json.loads((package.ROOT / "manifest.json").read_text(encoding="utf-8"))["version"]
 
 
-def patch_manifest(path: Path, target: str):
+def patch_manifest(path, target):
     m = json.loads(path.read_text(encoding="utf-8"))
     if target == "firefox":
         m["browser_specific_settings"] = GECKO
     path.write_text(json.dumps(m, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def build(target: str) -> Path:
+def build(target):
     # 在系统临时目录里组装（不触碰用户目录），完成后自动清理
     tmp = Path(tempfile.mkdtemp(prefix=f"clo_{target}_"))
     try:
-        for f in EXT_FILES:
-            shutil.copy2(ROOT / f, tmp / f)
-        for d in EXT_DIRS:
-            shutil.copytree(ROOT / d, tmp / d)
+        for rel in package.collect():  # 单一来源：与 package.py 打包同一批文件
+            dest = tmp / rel
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(package.ROOT / rel, dest)
         patch_manifest(tmp / "manifest.json", target)
 
-        zip_path = DIST / f"{ROOT.name}-{target}_v{version()}.zip"
+        zip_path = DIST / f"{package.ROOT.name}-{target}_v{version()}.zip"
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
             for f in sorted(tmp.rglob("*")):
                 if f.is_file():
@@ -69,10 +70,10 @@ def main():
         print(f"未知目标: {bad}，可选: {TARGETS}", file=sys.stderr)
         sys.exit(1)
 
-    for f in EXT_FILES:
-        if not (ROOT / f).is_file():
-            print(f"缺少源文件: {f}", file=sys.stderr)
-            sys.exit(1)
+    problems = package.validate()  # 打包前统一校验引用/权限，缺文件即中止
+    if problems:
+        print("\n".join(problems), file=sys.stderr)
+        sys.exit(1)
 
     DIST.mkdir(exist_ok=True)
     for t in targets:

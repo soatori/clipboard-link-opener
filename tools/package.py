@@ -1,10 +1,11 @@
-"""校验并打包 Chrome 扩展：检查 manifest / popup.html 引用的文件齐全，输出可上传/分享的 zip。
+"""校验并打包 Chrome / Edge 扩展：检查 manifest / popup.html 引用的文件齐全，输出可上传/分享的 zip。
 
 用法:  python tools/package.py
-输出:  dist/douyin-clipboard-link_v<version>.zip（manifest.json 位于压缩包根目录）
+输出:  dist/clipboard-link-opener_v<version>.zip（manifest.json 位于压缩包根目录）
 
 仓库布局：扩展文件直接放在仓库根目录，本脚本位于 tools/。打包时只收录扩展所需文件，
-排除 tools/、dist/、README、.gitignore 等仓库文件。
+排除 tools/、dist/、README、.gitignore 等仓库文件。本模块的 INCLUDE_* / collect / validate /
+ROOT 也被 tools/build.py 复用，作为“扩展文件清单”与“引用校验”的单一来源。
 """
 
 import json
@@ -38,9 +39,8 @@ def popup_assets(html):
 
 
 def collect():
-    files = []
-    for rel in INCLUDE_FILES:
-        files.append(rel)
+    """返回相对仓库根的待打包文件路径列表（含 icons 下所有文件）。"""
+    files = list(INCLUDE_FILES)
     for d in INCLUDE_DIRS:
         for f in sorted((ROOT / d).rglob("*")):
             if f.is_file():
@@ -48,7 +48,8 @@ def collect():
     return files
 
 
-def main():
+def validate():
+    """校验引用完整性与权限，返回问题列表（空表示通过）。"""
     manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
     problems = []
 
@@ -74,10 +75,16 @@ def main():
         if not (ROOT / rel).is_file():
             problems.append(f"待打包文件缺失: {rel}")
 
+    return problems
+
+
+def main():
+    problems = validate()
     if problems:
         print("\n".join(problems), file=sys.stderr)
         sys.exit(1)
 
+    manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
     DIST_DIR.mkdir(exist_ok=True)
     zip_path = DIST_DIR / f"{ROOT.name}_v{manifest['version']}.zip"
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:

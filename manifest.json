@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "剪贴板链接打开",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "复制任何 App 或网页的分享文案后点开扩展，一键从剪贴板中提取真实链接并打开对应网页。",
   "permissions": ["clipboardRead"],
   "icons": {
