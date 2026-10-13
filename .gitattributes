@@ -1,0 +1,18 @@
+# 统一换行：仓库内以 LF 存储，检出也保持 LF（跨平台一致，消除 CRLF 警告）
+* text=auto eol=lf
+
+# 二进制类型：不做换行转换与文本差异
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.zip binary
+
+# 文本文件显式声明（用于差异与语法处理）
+*.js    text diff
+*.css   text
+*.html  text
+*.json  text
+*.md    text
+*.py    text diff
