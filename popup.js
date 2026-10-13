@@ -38,8 +38,8 @@ function renderLinks(links) {
     const li = document.createElement('li');
 
     const chip = document.createElement('span');
-    chip.className = link.douyin ? 'chip' : 'chip other';
-    chip.textContent = link.douyin ? '抖音' : '其他';
+    chip.className = link.share ? 'chip' : 'chip other';
+    chip.textContent = link.host;
 
     const row = document.createElement('button');
     row.type = 'button';
@@ -69,7 +69,7 @@ openBtn.addEventListener('click', async () => {
   const links = extractLinks(await currentText());
   renderLinks(links);
   if (!links.length) {
-    setStatus('剪贴板为空或没有链接，请先在抖音里点“复制链接”', 'warn');
+    setStatus('剪贴板为空或没有链接，请先在 App / 网页里点“复制链接”或“分享”', 'warn');
     return;
   }
   openUrl(links[0]);
