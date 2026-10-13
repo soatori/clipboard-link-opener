@@ -38,7 +38,7 @@ https://v.douyin.com/xxxx/ 更多」），无法直接点击。本扩展会自�
 4. 点击「加载已解压的扩展程序」，选择**本仓库根目录**（即包含 `manifest.json` 的文件夹）。
 5. 工具栏出现图标即可使用；建议固定到工具栏方便一键调用。
 
-也可以直接使用 `tools/package.py` 生成的 `dist/clipboard-link-opener_v*.zip`（用于分享或上传商店）。
+也可以直接使用 `tools/build.py` 生成的 `dist/clipboard-link-opener-<target>_v*.zip`（`target` 取 `generic`/`chrome`/`edge`/`firefox`，用于分享或上传各商店）。
 
 ## 使用方法
 
@@ -77,7 +77,11 @@ https://v.douyin.com/xxxx/ 更多」），无法直接点击。本扩展会自�
 工具脚本在 `tools/` 目录下，仓库根目录即扩展本体。
 
 ```bash
-# 校验 manifest/popup 引用是否齐全，并打包到 dist/（manifest.json 位于压缩包根目录）
+# 按目标浏览器构建发布包：generic / chrome / edge / firefox（缺省全部四种）
+python tools/build.py
+python tools/build.py firefox chrome   # 只构建指定目标
+
+# 单一校验 + 打包（生成通用 zip）
 python tools/package.py
 
 # 重新生成图标（仅改图标时需要，会安装 Pillow）
@@ -86,7 +90,20 @@ python tools/make-icons.py
 ```
 
 `package.py` 会在打包前检查：manifest 与 popup.html 引用的文件是否存在、权限是否在白名单内、
-待打包文件是否齐全，任一不通过即报错退出。
+待打包文件是否齐全，任一不通过即报错退出。`build.py` 从同一份源码组装，产物为
+`dist/clipboard-link-opener-<target>_v<version>.zip`（manifest.json 位于压缩包根目录）。
+
+## 浏览器兼容与发布
+
+| 目标 | 说明 | 商店 |
+| --- | --- | --- |
+| `chrome` / `edge` / `generic` | 纯 Chromium Manifest V3，三者内容一致，仅命名区分 | Chrome Web Store / Edge Add-ons / 任意 Chromium 加载 |
+| `firefox` | 额外注入 `browser_specific_settings.gecko`（AMO 要求 id 与 `strict_min_version`） | Firefox Add-ons (AMO) |
+
+- Firefox 中 `navigator.clipboard.readText()` 需用户手势，弹窗刚打开时可能被拒——扩展已内置
+  粘贴兜底框，读取失败会自动显示，粘贴文案即可。
+- 发布到各商店前需注册对应开发者账号；Firefox 的 `gecko.id` 要与在 AMO 上创建的扩展一致。
+- 打包前可在 `tools/build.py` 顶部按需修改 `GECKO` 的 id 与最低版本。
 
 ## 目录结构
 
@@ -103,10 +120,12 @@ clipboard-link-opener/
 │   ├── icon-48.png
 │   └── icon-128.png
 ├── tools/
-│   ├── package.py        # 校验 + 打包
+│   ├── build.py          # 按浏览器构建 4 种发布包
+│   ├── package.py        # 校验 + 打包（通用 zip）
 │   ├── make-icons.py     # 生成图标
 │   └── requirements.txt  # 仅图标工具依赖 (Pillow)
 ├── dist/                 # 打包产物（已被 .gitignore 忽略）
+├── .gitattributes
 ├── .gitignore
 ├── CHANGELOG.md
 └── README.md

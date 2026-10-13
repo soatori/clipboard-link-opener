@@ -10,6 +10,11 @@
 - 文字提醒：弹窗底部固定安全提示，说明打开前请确认链接来源可信、扩展只在点击时跳转、不会自动打开。
 - 多链接时状态栏文案改为「进入上方指向的站点」，与目标预览对应。
 
+### 构建
+
+- 新增 `tools/build.py`：从同一份源码按目标浏览器出包（`generic`/`chrome`/`edge`/`firefox`），Firefox 自动注入 `browser_specific_settings.gecko`。
+- 新增 `.gitattributes` 统一换行为 LF。
+
 ## [2.0.0] - 2026-10-13
 
 ### 变更
