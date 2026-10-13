@@ -3,6 +3,9 @@ const statusEl = document.getElementById('status');
 const linksEl = document.getElementById('links');
 const fallbackEl = document.getElementById('fallback');
 const pasteEl = document.getElementById('paste');
+const targetEl = document.getElementById('target');
+const targetHostEl = document.getElementById('targetHost');
+const targetUrlEl = document.getElementById('targetUrl');
 
 const IDLE_TEXT = '点击后读取剪贴板，自动提取分享文案里的链接并打开网页';
 
@@ -32,6 +35,18 @@ function openUrl(link) {
   setStatus(`已打开 ${link.url}`, 'ok');
 }
 
+// 醒目显示「一键打开」将指向的目标站点与完整链接。
+function renderTarget(links) {
+  if (!links.length) {
+    targetEl.classList.add('hidden');
+    return;
+  }
+  const first = links[0];
+  targetHostEl.textContent = first.host;
+  targetUrlEl.textContent = first.url;
+  targetEl.classList.remove('hidden');
+}
+
 function renderLinks(links) {
   linksEl.textContent = '';
   for (const link of links) {
@@ -56,6 +71,7 @@ function renderLinks(links) {
     li.append(chip, row, tail);
     linksEl.append(li);
   }
+  renderTarget(links);
 }
 
 function refresh() {
@@ -91,5 +107,5 @@ pasteEl.addEventListener('keydown', (event) => {
     setStatus(IDLE_TEXT);
     return;
   }
-  setStatus(links.length > 1 ? `找到 ${links.length} 个链接，“打开链接”进入第一个` : '已识别剪贴板链接，点“打开链接”跳转');
+  setStatus(links.length > 1 ? `找到 ${links.length} 个链接，“打开链接”进入上方指向的站点` : '已识别剪贴板链接，点“打开链接”跳转');
 })();

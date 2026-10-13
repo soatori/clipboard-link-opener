@@ -9,6 +9,12 @@
     <h1>剪贴板链接</h1>
     <button id="openLink" class="primary" type="button">打开链接</button>
     <p id="status" class="status">点击后读取剪贴板，自动提取分享文案里的链接并打开网页</p>
+    <div id="target" class="target hidden">
+      <span class="target-label">将打开</span>
+      <span id="targetHost" class="target-host"></span>
+      <span id="targetUrl" class="target-url"></span>
+    </div>
+    <p class="tip">提醒：打开前请确认链接来源是否可信。本扩展只在你点击时跳转，不会自动打开。</p>
     <ul id="links" class="links"></ul>
     <div id="fallback" class="fallback hidden">
       <label for="paste">剪贴板读取被浏览器拦截，可在这里粘贴文案：</label>
