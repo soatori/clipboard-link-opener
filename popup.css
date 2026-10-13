@@ -1,0 +1,148 @@
+:root {
+  --fg: #1f1f1f;
+  --muted: #6b6b6b;
+  --line: #e3e3e3;
+  --accent: #0b57d0;
+  --warn: #b06000;
+  --err: #c5221f;
+  --ok: #1a7f37;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 380px;
+  margin: 0;
+  padding: 12px;
+  color: var(--fg);
+  font: 13px/1.5 system-ui, "Segoe UI", "Microsoft YaHei", sans-serif;
+}
+
+h1 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.primary {
+  width: 100%;
+  height: 40px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.primary:hover {
+  filter: brightness(1.06);
+}
+
+.status {
+  margin: 8px 0 0;
+  min-height: 18px;
+  color: var(--muted);
+}
+
+.status.ok {
+  color: var(--ok);
+}
+
+.status.warn,
+.status.err {
+  color: var(--err);
+}
+
+.status.warn {
+  color: var(--warn);
+}
+
+.links {
+  max-height: 210px;
+  margin: 10px 0 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.links li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+  border-top: 1px solid var(--line);
+}
+
+.chip {
+  flex: none;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #f0f3f8;
+  color: var(--accent);
+  font-size: 11px;
+}
+
+.chip.other {
+  background: #f2f2f2;
+  color: var(--muted);
+}
+
+.row {
+  flex: 1;
+  min-width: 0;
+  margin-left: auto;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.row:hover {
+  text-decoration: underline;
+}
+
+.row-open {
+  flex: none;
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+}
+
+.row-open:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.fallback {
+  margin-top: 10px;
+}
+
+.fallback label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--muted);
+}
+
+.fallback textarea {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font: inherit;
+  resize: vertical;
+}
+
+.hidden {
+  display: none;
+}
